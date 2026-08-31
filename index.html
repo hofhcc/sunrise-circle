@@ -17,8 +17,98 @@
       background: #f7f8f5;
       color: #263238;
     }
+    /* STAFF LOGIN */
+
+#loginScreen {
+  min-height: 100vh;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 420px;
+  background: white;
+  padding: 38px;
+  border-radius: 22px;
+  box-shadow: 0 12px 35px rgba(0,0,0,.08);
+  border: 1px solid #eceeea;
+}
+
+.login-brand {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.login-sun {
+  width: 68px;
+  height: 68px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  background: #f4b942;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 34px;
+}
+
+.login-brand h1 {
+  margin: 0;
+  font-size: 28px;
+}
+
+.login-brand p {
+  color: #727b78;
+  margin: 8px 0 0;
+}
+
+.login-card label {
+  display: block;
+  font-weight: 700;
+  margin: 16px 0 7px;
+  font-size: 14px;
+}
+
+.login-card input {
+  width: 100%;
+  padding: 13px 14px;
+  border: 1px solid #d8ddd8;
+  border-radius: 10px;
+  font-size: 15px;
+}
+
+.login-button {
+  width: 100%;
+  margin-top: 22px;
+  border: none;
+  border-radius: 10px;
+  padding: 13px;
+  background: #344e41;
+  color: white;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+#loginMessage {
+  min-height: 20px;
+  margin-top: 14px;
+  text-align: center;
+  color: #b73c3c;
+  font-size: 13px;
+}
+
+.login-note {
+  text-align: center;
+  color: #909895;
+  font-size: 12px;
+  margin-top: 20px;
+}
 
     .dashboard {
+      display: none;
       max-width: 1250px;
       margin: 0 auto;
       padding: 32px 24px 60px;
@@ -291,7 +381,42 @@
 </head>
 
 <body>
+<div id="loginScreen" class="login-screen">
+  <div class="login-card">
+    <div class="login-sun">☀️</div>
 
+    <h2>Sunrise Circle</h2>
+    <p class="login-subtitle">Staff Dashboard</p>
+
+    <form id="loginForm">
+      <label for="staffEmail">Email address</label>
+      <input
+        type="email"
+        id="staffEmail"
+        placeholder="care@hofhcc.org"
+        required
+      >
+
+      <label for="staffPassword">Password</label>
+      <input
+        type="password"
+        id="staffPassword"
+        placeholder="Enter your password"
+        required
+      >
+
+      <button type="submit" class="login-button">
+        Sign In
+      </button>
+
+      <div id="loginMessage"></div>
+    </form>
+
+    <div class="login-note">
+      Authorized Hearts of Hope staff only
+    </div>
+  </div>
+</div>
   <main class="dashboard">
 
     <header class="header">
@@ -458,7 +583,17 @@
     SUPABASE_URL,
     SUPABASE_PUBLISHABLE_KEY
   );
-    async function checkStaffSession() {
+ function showDashboard() {
+  document.getElementById("loginScreen").style.display = "none";
+  document.querySelector(".dashboard").style.display = "block";
+}
+
+function showLogin() {
+  document.getElementById("loginScreen").style.display = "flex";
+  document.querySelector(".dashboard").style.display = "none";
+}
+
+async function checkStaffSession() {
   const {
     data: { session },
     error
@@ -466,16 +601,45 @@
 
   if (error) {
     console.error("Session check failed:", error);
+    showLogin();
     return;
   }
 
   if (session) {
     console.log("Sunrise Circle staff session active.");
+    showDashboard();
   } else {
     console.log("No staff session found.");
+    showLogin();
   }
 }
 
+document
+  .getElementById("loginForm")
+  .addEventListener("submit", async function (event) {
+    event.preventDefault();
+
+    const email = document.getElementById("staffEmail").value.trim();
+    const password = document.getElementById("staffPassword").value;
+    const message = document.getElementById("loginMessage");
+
+    message.textContent = "Signing in...";
+
+    const { error } = await supabaseClient.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (error) {
+      console.error("Login failed:", error);
+      message.textContent = "Email or password is incorrect.";
+      return;
+    }
+
+    message.textContent = "";
+    showDashboard();
+  });
+  
 checkStaffSession();
 </script>
 </body>
