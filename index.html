@@ -564,7 +564,12 @@
 
         <div class="actions">
           <button class="call-button">Call Resident</button>
-          <button class="complete-button">Mark Complete</button>
+        <button
+  class="complete-button"
+  data-check-in-id="4"
+>
+  Mark Complete
+</button>
         </div>
 
       </div>
@@ -644,6 +649,34 @@ document
 
     message.textContent = "";
     showDashboard();
+  });
+    document
+  .querySelectorAll(".complete-button[data-check-in-id]")
+  .forEach(function (button) {
+    button.addEventListener("click", async function () {
+      const checkInId = button.dataset.checkInId;
+
+      button.disabled = true;
+      button.textContent = "Saving...";
+
+      const { data, error } = await supabaseClient
+        .from("check_ins")
+        .update({ follow_up_status: "completed" })
+        .eq("id", checkInId)
+        .select("id, follow_up_status")
+        .single();
+
+      if (error) {
+        console.error("Mark complete failed:", error);
+        button.disabled = false;
+        button.textContent = "Mark Complete";
+        alert("Could not mark this request complete.");
+        return;
+      }
+
+      console.log("Check-in completed:", data);
+      button.textContent = "Completed ✓";
+    });
   });
   document
   .getElementById("logoutButton")
