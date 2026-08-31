@@ -458,6 +458,25 @@
     SUPABASE_URL,
     SUPABASE_PUBLISHABLE_KEY
   );
+    async function checkStaffSession() {
+  const {
+    data: { session },
+    error
+  } = await supabaseClient.auth.getSession();
+
+  if (error) {
+    console.error("Session check failed:", error);
+    return;
+  }
+
+  if (session) {
+    console.log("Sunrise Circle staff session active.");
+  } else {
+    console.log("No staff session found.");
+  }
+}
+
+checkStaffSession();
 </script>
 </body>
 </html>
