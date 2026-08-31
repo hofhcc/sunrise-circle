@@ -431,9 +431,15 @@
         </div>
       </div>
 
-      <div class="updated">
-        ● Last updated: Just now
-      </div>
+    <div class="header-actions">
+  <div class="updated">
+    ● Last updated: Just now
+  </div>
+
+  <button type="button" id="logoutButton" class="logout-button">
+    Sign Out
+  </button>
+</div>
     </header>
 
 
@@ -639,7 +645,18 @@ document
     message.textContent = "";
     showDashboard();
   });
-  
+  document
+  .getElementById("logoutButton")
+  .addEventListener("click", async function () {
+    const { error } = await supabaseClient.auth.signOut();
+
+    if (error) {
+      console.error("Logout failed:", error);
+      return;
+    }
+
+    showLogin();
+  });
 checkStaffSession();
 </script>
 </body>
