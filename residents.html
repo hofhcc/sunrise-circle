@@ -347,7 +347,22 @@
       `;
     });
   }
+async function startResidentsPage() {
+  const signedIn = await checkStaffSession();
 
+  if (!signedIn) return;
+
+  await loadResidents();
+}
+
+document
+  .getElementById("addResidentButton")
+  .addEventListener("click", () => {
+    alert("Add Resident form coming next!");
+  });
+
+startResidentsPage();
+</script>
   async function startResidentsPage() {
     const signedIn = await checkStaffSession();
 
