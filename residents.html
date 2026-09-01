@@ -582,15 +582,35 @@ async function editResident(residentId) {
 
     message.textContent = "Saving resident...";
 
-    const { error } = await supabaseClient
-      .from("residents")
-      .insert({
-        first_name: firstName,
-        last_name: lastName,
-        phone_number: phoneNumber,
-        preferred_call_time: preferredCallTime || null,
-        active: active
-      });
+    const residentId = document.getElementById("residentId").value;
+
+let query;
+
+if (residentId) {
+  query = supabaseClient
+    .from("residents")
+    .update({
+      first_name: firstName,
+      last_name: lastName,
+      phone_number: phoneNumber,
+      preferred_call_time: preferredCallTime || null,
+      active: active
+    })
+    .eq("id", residentId);
+} else {
+  query = supabaseClient
+    .from("residents")
+    .insert({
+      first_name: firstName,
+      last_name: lastName,
+      phone_number: phoneNumber,
+      preferred_call_time: preferredCallTime || null,
+      active: active
+    });
+}
+
+const { error } = await query;
+    
 
     if (error) {
       console.error("Could not save resident:", error);
@@ -601,6 +621,8 @@ async function editResident(residentId) {
     message.textContent = "";
 
     document.getElementById("residentForm").reset();
+  document.getElementById("residentId").value = "";
+document.getElementById("residentFormTitle").textContent = "Add Resident";
     document.getElementById("residentActive").checked = true;
 
     document
