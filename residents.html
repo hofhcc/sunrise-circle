@@ -291,13 +291,17 @@ const SUPABASE_PUBLISHABLE_KEY =
     const residentList = document.getElementById("residentList");
 
     if (error) {
-      console.error("Residents failed:", error);
-      residentList.innerHTML = `
-        <div class="empty-message">
-          Residents could not be loaded.
-        </div>
-      `;
-      return;
+  console.error("Residents failed:", error);
+
+  residentList.innerHTML = `
+    <div class="empty-message">
+      Residents could not be loaded.<br><br>
+      <strong>${error.message}</strong>
+    </div>
+  `;
+
+  return;
+}
     }
 
     residentList.innerHTML = "";
