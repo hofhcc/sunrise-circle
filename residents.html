@@ -363,15 +363,5 @@ document
 
 startResidentsPage();
 </script>
-  async function startResidentsPage() {
-    const signedIn = await checkStaffSession();
-
-    if (!signedIn) return;
-
-    await loadResidents();
-  }
-
-  startResidentsPage();
-</script>
 </body>
 </html>
