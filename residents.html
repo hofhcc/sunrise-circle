@@ -266,8 +266,15 @@ const SUPABASE_PUBLISHABLE_KEY =
     } = await supabaseClient.auth.getSession();
 
     if (error || !session) {
-      window.location.href = "index.html";
-      return false;
+  console.log("Residents auth check:", { error, session });
+
+  document.getElementById("residentList").innerHTML = `
+    <div class="empty-message">
+      Staff session not found.
+    </div>
+  `;
+
+  return false;
     }
 
     return true;
