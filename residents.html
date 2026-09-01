@@ -506,6 +506,7 @@
               type="button"
               class="edit-button"
               data-resident-id="${resident.id}"
+onclick="editResident(${resident.id})"
             >
               Edit
             </button>
@@ -515,7 +516,34 @@
       `;
     });
   }
-async function startResidentsPage() {
+async function editResident(residentId) {
+  const { data, error } = await supabaseClient
+    .from("residents")
+    .select("id, first_name, last_name, phone_number, preferred_call_time, active")
+    .eq("id", residentId)
+    .single();
+
+  if (error) {
+    console.error("Could not load resident:", error);
+    alert("We couldn't load this resident. Please try again.");
+    return;
+  }
+
+  document.getElementById("residentId").value = data.id;
+  document.getElementById("firstName").value = data.first_name || "";
+  document.getElementById("lastName").value = data.last_name || "";
+  document.getElementById("phoneNumber").value = data.phone_number || "";
+  document.getElementById("preferredCallTime").value =
+    data.preferred_call_time || "";
+  document.getElementById("residentActive").checked = data.active;
+
+  document.getElementById("residentFormTitle").textContent = "Edit Resident";
+
+  document
+    .getElementById("residentFormPanel")
+    .classList.add("open");
+}
+  async function startResidentsPage() {
   const signedIn = await checkStaffSession();
 
   if (!signedIn) return;
