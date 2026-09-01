@@ -447,25 +447,25 @@
 
       <div class="summary-card">
         <div class="summary-icon">☀️</div>
-        <div class="summary-number">9</div>
+        <div class="summary-number" id="checkedInCount">0</div>
         <div class="summary-label">Checked In Today</div>
       </div>
 
       <div class="summary-card">
         <div class="summary-icon">📞</div>
-        <div class="summary-number">2</div>
+        <div class="summary-number" id="friendlyCallbackCount">0</div>
         <div class="summary-label">Friendly Callbacks</div>
       </div>
 
       <div class="summary-card">
         <div class="summary-icon">🚗</div>
-        <div class="summary-number">3</div>
+        <div class="summary-number" id="transportationCount">0</div>
         <div class="summary-label">Transportation Requests</div>
       </div>
 
       <div class="summary-card urgent-card">
         <div class="summary-icon">🚨</div>
-        <div class="summary-number">1</div>
+        <div class="summary-number" id="urgentCount">0</div>
         <div class="summary-label">Urgent Follow-up</div>
       </div>
 
@@ -476,10 +476,11 @@
 
       <div class="section-title">
         <h2>Needs Attention</h2>
-        <div class="queue-count">6 pending</div>
+      <div class="queue-count" id="queueCount">0 pending</div>
       </div>
 
-
+<div id="followUpList">
+  
       <div class="follow-up urgent-row">
 
         <div class="follow-icon">🚨</div>
@@ -573,7 +574,7 @@
         </div>
 
       </div>
-
+</div>
     </section>
 
 
@@ -593,11 +594,45 @@
   const supabaseClient = window.supabase.createClient(
     SUPABASE_URL,
     SUPABASE_PUBLISHABLE_KEY
-  );
- function showDashboard() {
+    );
+    async function loadDashboardSummary() {
+  const { data, error } = await supabaseClient
+    .from("dashboard_summary")
+    .select("*")
+    .single();
+
+  if (error) {
+    console.error("Dashboard summary failed:", error);
+    return;
+  }
+
+  document.getElementById("checkedInCount").textContent =
+    data.checked_in_today ?? 0;
+
+  document.getElementById("friendlyCallbackCount").textContent =
+    data.friendly_callbacks_pending ?? 0;
+
+  document.getElementById("transportationCount").textContent =
+    data.transportation_pending ?? 0;
+
+  document.getElementById("urgentCount").textContent =
+    data.urgent_follow_ups ?? 0;
+
+  const pendingTotal =
+    (data.friendly_callbacks_pending ?? 0) +
+    (data.transportation_pending ?? 0) +
+    (data.urgent_follow_ups ?? 0);
+
+  document.getElementById("queueCount").textContent =
+    `${pendingTotal} pending`;
+}
+
+  function showDashboard() {
   document.getElementById("loginScreen").style.display = "none";
   document.querySelector(".dashboard").style.display = "block";
+  loadDashboardSummary();
 }
+
 
 function showLogin() {
   document.getElementById("loginScreen").style.display = "flex";
