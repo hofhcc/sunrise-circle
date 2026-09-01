@@ -595,6 +595,7 @@
           <button
             class="complete-button"
             data-check-in-id="${item.check_in_id}"
+            onclick="markFollowUpComplete(${item.check_in_id})"
           >
             Mark Complete
           </button>
@@ -603,7 +604,21 @@
     `;
   });
 }
+async function markFollowUpComplete(checkInId) {
+  const { error } = await supabaseClient
+    .from("check_ins")
+    .update({ follow_up_status: "completed" })
+    .eq("id", checkInId);
 
+  if (error) {
+    console.error("Could not complete follow-up:", error);
+    alert("We couldn't mark this follow-up complete. Please try again.");
+    return;
+  }
+
+  await loadDashboardSummary();
+  await loadPendingFollowUps();
+}
   function showDashboard() {
   document.getElementById("loginScreen").style.display = "none";
   document.querySelector(".dashboard").style.display = "block";
