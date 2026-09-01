@@ -523,12 +523,22 @@ async function startResidentsPage() {
   await loadResidents();
 }
 
-document
+  document
   .getElementById("addResidentButton")
   .addEventListener("click", () => {
-    alert("Add Resident form coming next!");
+    document
+      .getElementById("residentFormPanel")
+      .classList.add("open");
   });
 
+  document
+  .getElementById("cancelResidentButton")
+  .addEventListener("click", () => {
+    document
+      .getElementById("residentFormPanel")
+      .classList.remove("open");
+  });
+  
 startResidentsPage();
 </script>
 </body>
