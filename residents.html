@@ -538,7 +538,49 @@ async function startResidentsPage() {
       .getElementById("residentFormPanel")
       .classList.remove("open");
   });
-  
+  document
+  .getElementById("residentForm")
+  .addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const firstName = document.getElementById("firstName").value.trim();
+    const lastName = document.getElementById("lastName").value.trim();
+    const phoneNumber = document.getElementById("phoneNumber").value.trim();
+    const preferredCallTime =
+      document.getElementById("preferredCallTime").value;
+    const active = document.getElementById("residentActive").checked;
+
+    const message = document.getElementById("residentFormMessage");
+
+    message.textContent = "Saving resident...";
+
+    const { error } = await supabaseClient
+      .from("residents")
+      .insert({
+        first_name: firstName,
+        last_name: lastName,
+        phone_number: phoneNumber,
+        preferred_call_time: preferredCallTime,
+        active: active
+      });
+
+    if (error) {
+      console.error("Could not save resident:", error);
+      message.textContent = error.message;
+      return;
+    }
+
+    message.textContent = "";
+
+    document.getElementById("residentForm").reset();
+    document.getElementById("residentActive").checked = true;
+
+    document
+      .getElementById("residentFormPanel")
+      .classList.remove("open");
+
+    await loadResidents();
+  });
 startResidentsPage();
 </script>
 </body>
