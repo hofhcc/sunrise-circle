@@ -377,7 +377,7 @@
 
       <div class="form-field">
         <label for="preferredCallTime">Preferred call time</label>
-        <input type="time" id="preferredCallTime" required>
+        <input type="time" id="preferredCallTime">
       </div>
 
       <div class="form-field full-width">
@@ -560,7 +560,7 @@ async function startResidentsPage() {
         first_name: firstName,
         last_name: lastName,
         phone_number: phoneNumber,
-        preferred_call_time: preferredCallTime,
+        preferred_call_time: preferredCallTime || null,
         active: active
       });
 
