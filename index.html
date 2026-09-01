@@ -481,97 +481,7 @@
 
 <div id="followUpList">
   
-      <div class="follow-up urgent-row">
-
-        <div class="follow-icon">🚨</div>
-
-        <div>
-          <div class="resident-name">Mary Test</div>
-          <div class="resident-detail">Sunrise Circle Resident</div>
-        </div>
-
-        <div>
-          <div class="request-title">
-            Urgent non-emergency assistance requested
-          </div>
-          <div class="request-time">
-            Today • 11:27 AM
-          </div>
-        </div>
-
-        <div>
-          <span class="status urgent-status">URGENT</span>
-        </div>
-
-        <div class="actions">
-          <button class="urgent-button">Call Resident</button>
-          <button class="complete-button">Mark Complete</button>
-        </div>
-
-      </div>
-
-
-      <div class="follow-up">
-
-        <div class="follow-icon">📞</div>
-
-        <div>
-          <div class="resident-name">Mary Test</div>
-          <div class="resident-detail">Sunrise Circle Resident</div>
-        </div>
-
-        <div>
-          <div class="request-title">
-            Friendly callback requested
-          </div>
-          <div class="request-time">
-            Today • 10:40 AM
-          </div>
-        </div>
-
-        <div>
-          <span class="status">PENDING</span>
-        </div>
-
-        <div class="actions">
-          <button class="call-button">Call Resident</button>
-          <button class="complete-button">Mark Complete</button>
-        </div>
-
-      </div>
-
-
-      <div class="follow-up">
-
-        <div class="follow-icon">🚗</div>
-
-        <div>
-          <div class="resident-name">Mary Test</div>
-          <div class="resident-detail">Sunrise Circle Resident</div>
-        </div>
-
-        <div>
-          <div class="request-title">
-            Transportation assistance requested
-          </div>
-          <div class="request-time">
-            Today • 10:52 AM
-          </div>
-        </div>
-
-        <div>
-          <span class="status">PENDING</span>
-        </div>
-
-        <div class="actions">
-          <button class="call-button">Call Resident</button>
-        <button
-  class="complete-button"
-  data-check-in-id="4"
->
-  Mark Complete
-</button>
-        </div>
+      
 
       </div>
 </div>
@@ -626,11 +536,79 @@
   document.getElementById("queueCount").textContent =
     `${pendingTotal} pending`;
 }
+    async function loadPendingFollowUps() {
+  const { data, error } = await supabaseClient
+    .from("pending_follow_ups")
+    .select("*")
+    .order("check_in_id", { ascending: false });
+
+  if (error) {
+    console.error("Pending follow-ups failed:", error);
+    return;
+  }
+
+  const followUpList = document.getElementById("followUpList");
+
+  followUpList.innerHTML = "";
+
+  data.forEach((item) => {
+    let icon = "📞";
+    let title = "Friendly callback requested";
+    let statusClass = "status";
+
+    if (item.follow_up_type === "transportation") {
+      icon = "🚗";
+      title = "Transportation assistance requested";
+    }
+
+    if (item.follow_up_type === "urgent_assistance") {
+      icon = "🚨";
+      title = "Urgent non-emergency assistance requested";
+      statusClass = "status urgent";
+    }
+
+    followUpList.innerHTML += `
+      <div class="follow-up">
+        <div class="follow-icon">${icon}</div>
+
+        <div>
+          <div class="resident-name">${item.resident_name}</div>
+          <div class="resident-subtitle">Sunrise Circle Resident</div>
+        </div>
+
+        <div>
+          <div class="request-title">${title}</div>
+          <div class="request-time">Pending follow-up</div>
+        </div>
+
+        <div>
+          <span class="${statusClass}">
+            ${item.follow_up_type === "urgent_assistance" ? "URGENT" : "PENDING"}
+          </span>
+        </div>
+
+        <div class="actions">
+          <a class="call-button" href="tel:${item.phone_number}">
+            Call Resident
+          </a>
+
+          <button
+            class="complete-button"
+            data-check-in-id="${item.check_in_id}"
+          >
+            Mark Complete
+          </button>
+        </div>
+      </div>
+    `;
+  });
+}
 
   function showDashboard() {
   document.getElementById("loginScreen").style.display = "none";
   document.querySelector(".dashboard").style.display = "block";
   loadDashboardSummary();
+  loadPendingFollowUps();
 }
 
 
