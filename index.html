@@ -607,7 +607,10 @@
 async function markFollowUpComplete(checkInId) {
   const { error } = await supabaseClient
     .from("check_ins")
-    .update({ follow_up_status: "completed" })
+    .update({
+  follow_up_status: "completed",
+  completed_at: new Date().toISOString()
+})
     .eq("id", checkInId);
 
   if (error) {
