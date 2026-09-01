@@ -246,6 +246,106 @@
     </div>
 
   </main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+<script>
+  const SUPABASE_URL = "https://yagrfbsgdyasjluankhj.supabase.co";
+
+const SUPABASE_PUBLISHABLE_KEY =
+  "sb_publishable_x7Hn1RvHSa-oQBvjjcBb7A_nTV32rAd";
+
+  const supabaseClient = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_PUBLISHABLE_KEY
+  );
+
+  async function checkStaffSession() {
+    const {
+      data: { session },
+      error
+    } = await supabaseClient.auth.getSession();
+
+    if (error || !session) {
+      window.location.href = "index.html";
+      return false;
+    }
+
+    return true;
+  }
+
+  async function loadResidents() {
+    const { data, error } = await supabaseClient
+      .from("residents")
+      .select(
+        "id, first_name, last_name, phone_number, preferred_call_time, active"
+      )
+      .order("first_name", { ascending: true });
+
+    const residentList = document.getElementById("residentList");
+
+    if (error) {
+      console.error("Residents failed:", error);
+      residentList.innerHTML = `
+        <div class="empty-message">
+          Residents could not be loaded.
+        </div>
+      `;
+      return;
+    }
+
+    residentList.innerHTML = "";
+
+    data.forEach((resident) => {
+      const fullName =
+        `${resident.first_name || ""} ${resident.last_name || ""}`.trim();
+
+      const statusText = resident.active ? "Active" : "Inactive";
+
+      residentList.innerHTML += `
+        <div class="resident-row">
+
+          <div class="resident-icon">👤</div>
+
+          <div>
+            <div class="resident-name">${fullName}</div>
+            <div class="resident-phone">${resident.phone_number || ""}</div>
+          </div>
+
+          <div class="resident-details">
+            <div class="resident-time">
+              Preferred call time:
+              ${resident.preferred_call_time || "Not set"}
+            </div>
+
+            <span class="status">
+              ${statusText}
+            </span>
+          </div>
+
+          <div class="resident-actions">
+            <button
+              type="button"
+              class="edit-button"
+              data-resident-id="${resident.id}"
+            >
+              Edit
+            </button>
+          </div>
+
+        </div>
+      `;
+    });
+  }
+
+  async function startResidentsPage() {
+    const signedIn = await checkStaffSession();
+
+    if (!signedIn) return;
+
+    await loadResidents();
+  }
+
+  startResidentsPage();
+</script>
 </body>
 </html>
