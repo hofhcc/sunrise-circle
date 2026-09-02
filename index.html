@@ -617,6 +617,17 @@
     `;
   });
 }
+    function formatTime(timeValue) {
+  if (!timeValue) return "Not set";
+
+  const [hours, minutes] = timeValue.split(":");
+  const hourNumber = Number(hours);
+
+  const suffix = hourNumber >= 12 ? "PM" : "AM";
+  const displayHour = hourNumber % 12 || 12;
+
+  return `${displayHour}:${minutes} ${suffix}`;
+}
     async function loadResidents() {
   const { data, error } = await supabaseClient
     .from("residents")
