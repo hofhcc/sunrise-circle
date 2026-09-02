@@ -379,7 +379,50 @@
         <label for="preferredCallTime">Preferred call time</label>
         <input type="time" id="preferredCallTime">
       </div>
+<div class="form-field">
+  <label for="addressLine1">Street address</label>
+  <input
+    type="text"
+    id="addressLine1"
+    placeholder="123 Main Street"
+  >
+</div>
 
+<div class="form-field">
+  <label for="unitNumber">Unit / apartment</label>
+  <input
+    type="text"
+    id="unitNumber"
+    placeholder="Unit 1204"
+  >
+</div>
+
+<div class="form-field">
+  <label for="city">City</label>
+  <input
+    type="text"
+    id="city"
+    placeholder="Toronto"
+  >
+</div>
+
+<div class="form-field">
+  <label for="postalCode">Postal code</label>
+  <input
+    type="text"
+    id="postalCode"
+    placeholder="M1X 1X1"
+  >
+</div>
+
+<div class="form-field full-width">
+  <label for="accessNotes">Access / visit notes</label>
+  <textarea
+    id="accessNotes"
+    rows="3"
+    placeholder="Buzz code, call before knocking, mobility or access information..."
+  ></textarea>
+</div>
       <div class="form-field full-width">
         <label class="checkbox-row">
           <input type="checkbox" id="residentActive" checked>
@@ -519,7 +562,7 @@ onclick="editResident(${resident.id})"
 async function editResident(residentId) {
   const { data, error } = await supabaseClient
     .from("residents")
-    .select("id, first_name, last_name, phone_number, preferred_call_time, active")
+    .select("id, first_name, last_name, phone_number, preferred_call_time, address_line1, unit_number, city, postal_code, access_notes, active")
     .eq("id", residentId)
     .single();
 
@@ -535,6 +578,20 @@ async function editResident(residentId) {
   document.getElementById("phoneNumber").value = data.phone_number || "";
   document.getElementById("preferredCallTime").value =
     data.preferred_call_time || "";
+  document.getElementById("addressLine1").value =
+  data.address_line1 || "";
+
+document.getElementById("unitNumber").value =
+  data.unit_number || "";
+
+document.getElementById("city").value =
+  data.city || "";
+
+document.getElementById("postalCode").value =
+  data.postal_code || "";
+
+document.getElementById("accessNotes").value =
+  data.access_notes || "";
   document.getElementById("residentActive").checked = data.active;
 
   document.getElementById("residentFormTitle").textContent = "Edit Resident";
@@ -576,6 +633,11 @@ async function editResident(residentId) {
     const phoneNumber = document.getElementById("phoneNumber").value.trim();
     const preferredCallTime =
       document.getElementById("preferredCallTime").value;
+const addressLine1 = document.getElementById("addressLine1").value.trim();
+const unitNumber = document.getElementById("unitNumber").value.trim();
+const city = document.getElementById("city").value.trim();
+const postalCode = document.getElementById("postalCode").value.trim();
+const accessNotes = document.getElementById("accessNotes").value.trim();
     const active = document.getElementById("residentActive").checked;
 
     const message = document.getElementById("residentFormMessage");
@@ -594,6 +656,11 @@ if (residentId) {
       last_name: lastName,
       phone_number: phoneNumber,
       preferred_call_time: preferredCallTime || null,
+      address_line1: addressLine1 || null,
+unit_number: unitNumber || null,
+city: city || null,
+postal_code: postalCode || null,
+access_notes: accessNotes || null,
       active: active
     })
     .eq("id", residentId);
@@ -605,6 +672,11 @@ if (residentId) {
       last_name: lastName,
       phone_number: phoneNumber,
       preferred_call_time: preferredCallTime || null,
+      address_line1: addressLine1 || null,
+unit_number: unitNumber || null,
+city: city || null,
+postal_code: postalCode || null,
+access_notes: accessNotes || null,
       active: active
     });
 }
