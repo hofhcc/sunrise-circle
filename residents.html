@@ -529,9 +529,18 @@
           <div class="resident-icon">👤</div>
 
           <div>
-            <div class="resident-name">${fullName}</div>
-            <div class="resident-phone">${resident.phone_number || ""}</div>
-          </div>
+            <div>
+  <button
+    type="button"
+    class="resident-name resident-profile-button"
+    onclick="viewResidentProfile(${resident.id})"
+  >
+    ${fullName}
+  </button>
+
+  <div class="resident-phone">
+    ${resident.phone_number || ""}
+  </div>
 
           <div class="resident-details">
             <div class="resident-time">
