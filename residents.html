@@ -524,47 +524,49 @@
       const statusText = resident.active ? "Active" : "Inactive";
 
       residentList.innerHTML += `
-        <div class="resident-row">
+      <div class="resident-row">
 
-          <div class="resident-icon">👤</div>
+  <div class="resident-icon">👤</div>
 
-          <div>
-            <div>
-  <button
-    type="button"
-    class="resident-name resident-profile-button"
-    onclick="viewResidentProfile(${resident.id})"
-  >
-    ${fullName}
-  </button>
+  <div>
+    <button
+      type="button"
+      class="resident-name resident-profile-button"
+      onclick="viewResidentProfile(${resident.id})"
+    >
+      ${fullName}
+    </button>
 
-  <div class="resident-phone">
-    ${resident.phone_number || ""}
+    <div class="resident-phone">
+      ${resident.phone_number || ""}
+    </div>
   </div>
 
-          <div class="resident-details">
-            <div class="resident-time">
-              Preferred call time:
-              ${resident.preferred_call_time || "Not set"}
-            </div>
+  <div class="resident-details">
+    <div class="resident-time">
+      Preferred call time:
+      ${resident.preferred_call_time || "Not set"}
+    </div>
 
-            <span class="status">
-              ${statusText}
-            </span>
-          </div>
+    <span class="status">
+      ${statusText}
+    </span>
+  </div>
 
-          <div class="resident-actions">
-            <button
-              type="button"
-              class="edit-button"
-              data-resident-id="${resident.id}"
-onclick="editResident(${resident.id})"
-            >
-              Edit
-            </button>
-          </div>
+  <div class="resident-actions">
+    <button
+      type="button"
+      class="edit-button"
+      data-resident-id="${resident.id}"
+      onclick="editResident(${resident.id})"
+    >
+      Edit
+    </button>
+  </div>
 
-        </div>
+</div>
+
+        
       `;
     });
   }
