@@ -715,6 +715,13 @@ document.getElementById("accessNotes").value =
   if (!signedIn) return;
 
   await loadResidents();
+
+  const params = new URLSearchParams(window.location.search);
+  const residentId = params.get("id");
+
+  if (residentId) {
+    await editResident(residentId);
+  }
 }
 
   document
