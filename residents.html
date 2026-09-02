@@ -283,7 +283,19 @@
   background: #2f503f;
   color: white;
 }
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  width: fit-content;
+}
 
+.checkbox-row input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+  flex: 0 0 auto;
+}
 @media (max-width: 650px) {
   .form-grid {
     grid-template-columns: 1fr;
@@ -561,7 +573,7 @@
   <div class="resident-details">
     <div class="resident-time">
       Preferred call time:
-      ${resident.preferred_call_time || "Not set"}
+      ${formatTime(resident.preferred_call_time)}
     </div>
 
     <span class="status">
@@ -627,6 +639,17 @@ document.getElementById("accessNotes").value =
     .getElementById("residentFormPanel")
     .classList.add("open");
 }
+  function formatTime(timeValue) {
+  if (!timeValue) return "Not set";
+
+  const [hours, minutes] = timeValue.split(":");
+  const hourNumber = Number(hours);
+
+  const suffix = hourNumber >= 12 ? "PM" : "AM";
+  const displayHour = hourNumber % 12 || 12;
+
+  return `${displayHour}:${minutes} ${suffix}`;
+}
   async function viewResidentProfile(residentId) {
   const { data, error } = await supabaseClient
     .from("residents")
@@ -664,7 +687,7 @@ document.getElementById("accessNotes").value =
 
     <div style="margin-bottom: 14px;">
       <strong>Preferred call time</strong><br>
-      ${data.preferred_call_time || "Not set"}
+      ${formatTime(data.preferred_call_time)}
     </div>
 
     <div style="margin-bottom: 14px;">
