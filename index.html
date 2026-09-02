@@ -575,15 +575,21 @@
     let statusClass = "status";
 
     if (item.follow_up_type === "transportation") {
-      icon = "🚗";
-      title = "Transportation assistance requested";
-    }
+  icon = "🚗";
+  title = "Transportation assistance requested";
+}
 
-    if (item.follow_up_type === "urgent_assistance") {
-      icon = "🚨";
-      title = "Urgent non-emergency assistance requested";
-      statusClass = "status urgent";
-    }
+if (item.follow_up_type === "urgent_assistance") {
+  icon = "🚨";
+  title = "Urgent non-emergency assistance requested";
+  statusClass = "status urgent";
+}
+
+if (item.follow_up_type === "manual_follow_up") {
+  icon = "⚠️";
+  title = "No confirmed check-in after 2 attempts";
+  statusClass = "status urgent";
+}
 
     followUpList.innerHTML += `
       <div class="follow-up">
@@ -601,7 +607,13 @@
 
         <div>
           <span class="${statusClass}">
-            ${item.follow_up_type === "urgent_assistance" ? "URGENT" : "PENDING"}
+            ${
+  item.follow_up_type === "urgent_assistance"
+    ? "URGENT"
+    : item.follow_up_type === "manual_follow_up"
+      ? "MANUAL FOLLOW-UP"
+      : "PENDING"
+}
           </span>
         </div>
 
