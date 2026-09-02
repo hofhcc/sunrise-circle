@@ -346,7 +346,23 @@
       </div>
 
     </section>
+<div id="residentProfilePanel" class="modal-overlay">
+  <div class="modal-card">
 
+    <div id="residentProfileContent"></div>
+
+    <div class="modal-actions">
+      <button
+        type="button"
+        class="cancel-button"
+        onclick="document.getElementById('residentProfilePanel').classList.remove('open')"
+      >
+        Close
+      </button>
+    </div>
+
+  </div>
+</div>
 <div id="residentFormPanel" class="modal-overlay">
   <div class="modal-card">
   <h2 id="residentFormTitle">Add Resident</h2>
@@ -610,6 +626,65 @@ document.getElementById("accessNotes").value =
   document
     .getElementById("residentFormPanel")
     .classList.add("open");
+}
+  async function viewResidentProfile(residentId) {
+  const { data, error } = await supabaseClient
+    .from("residents")
+    .select(
+      "id, first_name, last_name, phone_number, preferred_call_time, address_line1, unit_number, city, postal_code, access_notes, active"
+    )
+    .eq("id", residentId)
+    .single();
+
+  if (error) {
+    console.error("Could not load resident profile:", error);
+    alert("We couldn't load this resident profile. Please try again.");
+    return;
+  }
+
+  const fullName =
+    `${data.first_name || ""} ${data.last_name || ""}`.trim();
+
+  const addressParts = [
+    data.address_line1,
+    data.unit_number ? `Unit ${data.unit_number}` : null,
+    data.city,
+    data.postal_code
+  ].filter(Boolean);
+
+  const profileHtml = `
+    <div style="font-size: 22px; font-weight: 700; margin-bottom: 18px;">
+      ${fullName}
+    </div>
+
+    <div style="margin-bottom: 14px;">
+      <strong>Phone</strong><br>
+      ${data.phone_number || "Not provided"}
+    </div>
+
+    <div style="margin-bottom: 14px;">
+      <strong>Preferred call time</strong><br>
+      ${data.preferred_call_time || "Not set"}
+    </div>
+
+    <div style="margin-bottom: 14px;">
+      <strong>Address</strong><br>
+      ${addressParts.length ? addressParts.join("<br>") : "Not provided"}
+    </div>
+
+    <div style="margin-bottom: 14px;">
+      <strong>Access / visit notes</strong><br>
+      ${data.access_notes || "None"}
+    </div>
+
+    <div>
+      <strong>Status</strong><br>
+      ${data.active ? "Active" : "Inactive"}
+    </div>
+  `;
+
+  document.getElementById("residentProfileContent").innerHTML = profileHtml;
+  document.getElementById("residentProfilePanel").classList.add("open");
 }
   async function startResidentsPage() {
   const signedIn = await checkStaffSession();
