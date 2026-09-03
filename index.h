@@ -523,7 +523,7 @@
     SUPABASE_URL,
     SUPABASE_PUBLISHABLE_KEY
     );
-    async function loadDashboardSummary() {
+async function loadDashboardSummary() {
   const { data, error } = await supabaseClient
     .from("dashboard_summary")
     .select("*")
@@ -545,14 +545,6 @@
 
   document.getElementById("urgentCount").textContent =
     data.urgent_follow_ups ?? 0;
-
-  const pendingTotal =
-    (data.friendly_callbacks_pending ?? 0) +
-    (data.transportation_pending ?? 0) +
-    (data.urgent_follow_ups ?? 0);
-
-  document.getElementById("queueCount").textContent =
-    `${pendingTotal} pending`;
 }
     async function loadPendingFollowUps() {
   const { data, error } = await supabaseClient
