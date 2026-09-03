@@ -523,7 +523,8 @@
     SUPABASE_URL,
     SUPABASE_PUBLISHABLE_KEY
     );
-async function loadDashboardSummary() {
+
+   async function loadDashboardSummary() {
   const { data, error } = await supabaseClient
     .from("dashboard_summary")
     .select("*")
@@ -546,7 +547,9 @@ async function loadDashboardSummary() {
   document.getElementById("urgentCount").textContent =
     data.urgent_follow_ups ?? 0;
 }
-    async function loadPendingFollowUps() {
+
+
+async function loadPendingFollowUps() {
   const { data, error } = await supabaseClient
     .from("pending_follow_ups")
     .select("*")
@@ -559,29 +562,36 @@ async function loadDashboardSummary() {
 
   const followUpList = document.getElementById("followUpList");
 
+  // Count the actual rows displayed in Needs Attention.
+  document.getElementById("queueCount").textContent =
+    `${data.length} pending`;
+
   followUpList.innerHTML = "";
 
   data.forEach((item) => {
     let icon = "📞";
     let title = "Friendly callback requested";
     let statusClass = "status";
+    let statusText = "PENDING";
 
     if (item.follow_up_type === "transportation") {
-  icon = "🚗";
-  title = "Transportation assistance requested";
-}
+      icon = "🚗";
+      title = "Transportation assistance requested";
+    }
 
-if (item.follow_up_type === "urgent_assistance") {
-  icon = "🚨";
-  title = "Urgent non-emergency assistance requested";
-  statusClass = "status urgent";
-}
+    if (item.follow_up_type === "urgent_assistance") {
+      icon = "🚨";
+      title = "Urgent non-emergency assistance requested";
+      statusClass = "status urgent";
+      statusText = "URGENT";
+    }
 
-if (item.follow_up_type === "manual_follow_up") {
-  icon = "⚠️";
-  title = "No confirmed check-in after 2 attempts";
-  statusClass = "status urgent";
-}
+    if (item.follow_up_type === "manual_follow_up") {
+      icon = "⚠️";
+      title = "No confirmed check-in after 2 attempts";
+      statusClass = "status urgent";
+      statusText = "MANUAL FOLLOW-UP";
+    }
 
     followUpList.innerHTML += `
       <div class="follow-up">
@@ -599,13 +609,7 @@ if (item.follow_up_type === "manual_follow_up") {
 
         <div>
           <span class="${statusClass}">
-            ${
-  item.follow_up_type === "urgent_assistance"
-    ? "URGENT"
-    : item.follow_up_type === "manual_follow_up"
-      ? "MANUAL FOLLOW-UP"
-      : "PENDING"
-}
+            ${statusText}
           </span>
         </div>
 
@@ -626,7 +630,7 @@ if (item.follow_up_type === "manual_follow_up") {
     `;
   });
 }
-    function formatTime(timeValue) {
+function formatTime(timeValue) {
   if (!timeValue) return "Not set";
 
   const [hours, minutes] = timeValue.split(":");
