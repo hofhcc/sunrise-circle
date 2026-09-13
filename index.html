@@ -162,6 +162,83 @@
       font-size: 13px;
     }
 
+    
+    
+    /* DAILY PHONE ANNOUNCEMENT */
+
+.announcement-card {
+  background: white;
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: 0 5px 18px rgba(0,0,0,.06);
+  border: 1px solid #eceeea;
+}
+
+.announcement-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+}
+
+.announcement-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-weight: 600;
+}
+
+.announcement-grid input,
+.announcement-grid select {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid #d8ddd8;
+  border-radius: 10px;
+  font: inherit;
+  background: white;
+}
+
+.announcement-grid input:focus,
+.announcement-grid select:focus {
+  outline: 2px solid #8fb9a8;
+  outline-offset: 1px;
+}
+
+.announcement-actions {
+  margin-top: 20px;
+}
+
+#saveAnnouncementButton {
+  border: 0;
+  border-radius: 10px;
+  padding: 11px 18px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.announcement-preview {
+  margin-top: 20px;
+  padding: 18px;
+  border-radius: 12px;
+  background: #f7f8f6;
+  border: 1px solid #eceeea;
+}
+
+.announcement-preview strong {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.announcement-preview p {
+  margin: 0;
+  line-height: 1.6;
+}
+
+@media (max-width: 700px) {
+  .announcement-grid {
+    grid-template-columns: 1fr;
+  }
+}
     /* SUMMARY CARDS */
 
     .summary-grid {
@@ -470,7 +547,92 @@
       </div>
 
     </section>
+<section class="section" id="dailyAnnouncementSection">
+  <div class="section-title">
+    <h2>Daily Phone Announcement</h2>
+  </div>
 
+  <div class="announcement-card">
+    <div class="announcement-grid">
+
+      <label>
+        Announcement Active
+        <select id="announcementActive">
+          <option value="true">Yes</option>
+          <option value="false">No</option>
+        </select>
+      </label>
+
+      <label>
+        Program Date
+        <input type="date" id="announcementDate">
+      </label>
+
+      <label>
+        Program Status
+        <select id="programStatus">
+          <option value="open">Open</option>
+          <option value="closed">Closed</option>
+          <option value="no_program">No Program Today</option>
+        </select>
+      </label>
+
+      <label>
+        Start Time
+        <input type="time" id="programStartTime">
+      </label>
+
+      <label>
+        End Time
+        <input type="time" id="programEndTime">
+      </label>
+
+      <label>
+        Today’s Activities
+        <input type="text" id="activities" placeholder="e.g. Bingo, coffee and social time">
+      </label>
+
+      <label>
+        Food / Meals
+        <input type="text" id="foodMeals" placeholder="e.g. Breakfast and takeaway lunch">
+      </label>
+
+      <label>
+        Transportation
+        <select id="transportationStatus">
+          <option value="">Not specified</option>
+          <option value="available">Available</option>
+          <option value="limited">Limited</option>
+          <option value="not_available">Not Available</option>
+        </select>
+      </label>
+
+      <label>
+        Special Announcement
+        <input type="text" id="specialAnnouncement" placeholder="e.g. Shoppers donation table today">
+      </label>
+
+      <label>
+        Next Program Date
+        <input type="date" id="nextProgramDate">
+      </label>
+
+    </div>
+
+    <div class="announcement-actions">
+      <button type="button" id="saveAnnouncementButton">
+        Save Announcement
+      </button>
+    </div>
+
+    <div class="announcement-preview">
+      <strong>Caller Preview</strong>
+      <p id="announcementPreview">
+        No announcement loaded yet.
+      </p>
+    </div>
+  </div>
+</section>
 
     <section class="section">
 
