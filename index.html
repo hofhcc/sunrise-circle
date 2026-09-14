@@ -742,8 +742,88 @@
 
   document.getElementById("nextProgramDate").value =
     data.next_program_date || "";
+      updateAnnouncementPreview();
 }
-    
+   function updateAnnouncementPreview() {
+  const status = document.getElementById("programStatus").value;
+  const date = document.getElementById("announcementDate").value;
+  const startTime = document.getElementById("programStartTime").value;
+  const endTime = document.getElementById("programEndTime").value;
+  const activities = document.getElementById("activities").value.trim();
+  const foodMeals = document.getElementById("foodMeals").value.trim();
+  const transportation =
+    document.getElementById("transportationStatus").value;
+  const specialAnnouncement =
+    document.getElementById("specialAnnouncement").value.trim();
+  const nextProgramDate =
+    document.getElementById("nextProgramDate").value;
+
+  const parts = [];
+
+  if (status === "closed") {
+    parts.push("Hearts of Hope is closed today.");
+  } else if (status === "no_program") {
+    parts.push("There is no Hearts of Hope program scheduled today.");
+  } else {
+    if (date) {
+      const spokenDate = new Date(`${date}T12:00:00`).toLocaleDateString(
+        "en-CA",
+        {
+          weekday: "long",
+          month: "long",
+          day: "numeric"
+        }
+      );
+
+      parts.push(`The program is scheduled for ${spokenDate}.`);
+    }
+
+    if (startTime && endTime) {
+      parts.push(`Program hours are ${startTime} to ${endTime}.`);
+    }
+
+    if (activities) {
+      parts.push(`Today's activities include ${activities}.`);
+    }
+
+    if (foodMeals) {
+      parts.push(foodMeals.endsWith(".") ? foodMeals : `${foodMeals}.`);
+    }
+
+    if (transportation === "available") {
+      parts.push("Transportation assistance is available.");
+    } else if (transportation === "limited") {
+      parts.push("Transportation assistance is limited today.");
+    } else if (transportation === "not_available") {
+      parts.push("Transportation assistance is not available today.");
+    }
+
+    if (specialAnnouncement) {
+      parts.push(
+        specialAnnouncement.endsWith(".")
+          ? specialAnnouncement
+          : `${specialAnnouncement}.`
+      );
+    }
+  }
+
+  if (nextProgramDate) {
+    const spokenNextDate = new Date(
+      `${nextProgramDate}T12:00:00`
+    ).toLocaleDateString("en-CA", {
+      weekday: "long",
+      month: "long",
+      day: "numeric"
+    });
+
+    parts.push(`The next program date is ${spokenNextDate}.`);
+  }
+
+  document.getElementById("announcementPreview").textContent =
+    parts.length > 0
+      ? parts.join(" ")
+      : "No announcement details have been entered yet.";
+} 
    async function loadDashboardSummary() {
   const { data, error } = await supabaseClient
     .from("dashboard_summary")
@@ -786,26 +866,8 @@ async function loadPendingFollowUps() {
   document.getElementById("queueCount").textContent =
     `${data.length} pending`;
 
-  followUpList.innerHTML = "";
-
-  data.forEach((item) => {
-    let icon = "📞";
-    let title = "Friendly callback requested";
-    let statusClass = "status";
-    let statusText = "PENDING";
-
-    if (item.follow_up_type === "transportation") {
-      icon = "🚗";
-      title = "Transportation assistance requested";
     }
-
-    if (item.follow_up_type === "urgent_assistance") {
-      icon = "🚨";
-      title = "Urgent non-emergency assistance requested";
-      statusClass = "status urgent";
-      statusText = "URGENT";
-    }
-
+    
     if (item.follow_up_type === "manual_follow_up") {
       icon = "⚠️";
       title = "No confirmed check-in after 2 attempts";
@@ -1027,7 +1089,23 @@ document
 
     showLogin();
   });
+[
+  "announcementActive",
+  "announcementDate",
+  "programStatus",
+  "programStartTime",
+  "programEndTime",
+  "activities",
+  "foodMeals",
+  "transportationStatus",
+  "specialAnnouncement",
+  "nextProgramDate"
+].forEach((id) => {
+  const field = document.getElementById(id);
 
+  field.addEventListener("input", updateAnnouncementPreview);
+  field.addEventListener("change", updateAnnouncementPreview);
+});
     document
   .getElementById("saveAnnouncementButton")
   .addEventListener("click", async function () {
