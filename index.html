@@ -695,21 +695,24 @@
   }).format(new Date());
 
   const { data, error } = await supabaseClient
-    .from("daily_announcements")
-    .select("*")
-    .eq("announcement_date", today)
-    .maybeSingle();
+  .from("daily_announcements")
+  .select("*")
+  .eq("is_active", true)
+  .order("updated_at", { ascending: false })
+  .limit(1)
+  .maybeSingle();
 
   if (error) {
     console.error("Daily announcement load failed:", error);
     return;
   }
 
-  document.getElementById("announcementDate").value = today;
+  document.getElementById("announcementDate").value =
+  data ? data.announcement_date : today;
 
   if (!data) {
     document.getElementById("announcementPreview").textContent =
-      "No announcement has been saved for today yet.";
+      "No active announcement has been saved yet."
     return;
   }
 
