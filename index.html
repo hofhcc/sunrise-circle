@@ -686,6 +686,61 @@
     SUPABASE_PUBLISHABLE_KEY
     );
 
+    async function loadDailyAnnouncement() {
+  const today = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Toronto",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).format(new Date());
+
+  const { data, error } = await supabaseClient
+    .from("daily_announcements")
+    .select("*")
+    .eq("announcement_date", today)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Daily announcement load failed:", error);
+    return;
+  }
+
+  document.getElementById("announcementDate").value = today;
+
+  if (!data) {
+    document.getElementById("announcementPreview").textContent =
+      "No announcement has been saved for today yet.";
+    return;
+  }
+
+  document.getElementById("announcementActive").value =
+    String(data.is_active);
+
+  document.getElementById("programStatus").value =
+    data.program_status || "open";
+
+  document.getElementById("programStartTime").value =
+    data.start_time ? data.start_time.slice(0, 5) : "";
+
+  document.getElementById("programEndTime").value =
+    data.end_time ? data.end_time.slice(0, 5) : "";
+
+  document.getElementById("activities").value =
+    data.activities || "";
+
+  document.getElementById("foodMeals").value =
+    data.food_meals || "";
+
+  document.getElementById("transportationStatus").value =
+    data.transportation_status || "";
+
+  document.getElementById("specialAnnouncement").value =
+    data.special_announcement || "";
+
+  document.getElementById("nextProgramDate").value =
+    data.next_program_date || "";
+}
+    
    async function loadDashboardSummary() {
   const { data, error } = await supabaseClient
     .from("dashboard_summary")
@@ -871,9 +926,10 @@ async function markFollowUpComplete(checkInId) {
   function showDashboard() {
   document.getElementById("loginScreen").style.display = "none";
   document.querySelector(".dashboard").style.display = "block";
+  loadDailyAnnouncement();
   loadDashboardSummary();
   loadPendingFollowUps();
-    loadResidents();
+  loadResidents();
 }
 
 
@@ -968,6 +1024,71 @@ document
 
     showLogin();
   });
+
+    document
+  .getElementById("saveAnnouncementButton")
+  .addEventListener("click", async function () {
+    const button = this;
+
+    const announcementDate =
+      document.getElementById("announcementDate").value;
+
+    if (!announcementDate) {
+      alert("Please choose a program date.");
+      return;
+    }
+
+    button.disabled = true;
+    button.textContent = "Saving...";
+
+    const announcement = {
+      announcement_date: announcementDate,
+      is_active:
+        document.getElementById("announcementActive").value === "true",
+      program_status:
+        document.getElementById("programStatus").value,
+      start_time:
+        document.getElementById("programStartTime").value || null,
+      end_time:
+        document.getElementById("programEndTime").value || null,
+      activities:
+        document.getElementById("activities").value.trim() || null,
+      food_meals:
+        document.getElementById("foodMeals").value.trim() || null,
+      transportation_status:
+        document.getElementById("transportationStatus").value || null,
+      special_announcement:
+        document.getElementById("specialAnnouncement").value.trim() || null,
+      next_program_date:
+        document.getElementById("nextProgramDate").value || null,
+      updated_at: new Date().toISOString()
+    };
+
+    const { error } = await supabaseClient
+      .from("daily_announcements")
+      .upsert(announcement, {
+        onConflict: "announcement_date"
+      });
+
+    if (error) {
+      console.error("Announcement save failed:", error);
+      alert("Could not save the announcement. Please try again.");
+
+      button.disabled = false;
+      button.textContent = "Save Announcement";
+      return;
+    }
+
+    button.textContent = "Saved ✓";
+
+    setTimeout(() => {
+      button.disabled = false;
+      button.textContent = "Save Announcement";
+    }, 2000);
+
+    await loadDailyAnnouncement();
+  });
+    
 checkStaffSession();
 </script>
 </body>
