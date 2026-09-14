@@ -1072,7 +1072,7 @@ document
 
     if (error) {
       console.error("Announcement save failed:", error);
-      alert("Could not save the announcement. Please try again.");
+      alert(`Could not save the announcement: ${error.message}`);
 
       button.disabled = false;
       button.textContent = "Save Announcement";
