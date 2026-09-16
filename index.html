@@ -866,7 +866,13 @@ async function loadPendingFollowUps() {
   document.getElementById("queueCount").textContent =
     `${data.length} pending`;
 
-    }
+    followUpList.innerHTML = "";
+
+data.forEach((item) => {
+  let icon = "📞";
+  let title = "Follow-up needed";
+  let statusClass = "status pending";
+  let statusText = "PENDING";
     
     if (item.follow_up_type === "manual_follow_up") {
       icon = "⚠️";
