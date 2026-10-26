@@ -349,6 +349,7 @@
       </div>
 
 
+      <div style="margin: 0 0 18px;"><label for="residentFilter">Show: </label><select id="residentFilter"><option value="active">Active residents</option><option value="inactive">Inactive residents</option><option value="all">All residents</option></select></div>
       <div id="residentList">
 
         <div class="empty-message">
@@ -519,6 +520,10 @@
     return true;
   }
 
+  let currentResidents = [];
+  const filter = document.getElementById("residentFilter");
+  filter.addEventListener("change", renderResidents);
+
   async function loadResidents() {
     const { data, error } = await supabaseClient
       .from("residents")
@@ -543,9 +548,16 @@
 }
 
 
-    residentList.innerHTML = "";
+    currentResidents = data || [];
+    renderResidents();
+  }
 
-    data.forEach((resident) => {
+  function renderResidents() {
+    const residentList = document.getElementById("residentList");
+    residentList.innerHTML = "";
+    const shown = currentResidents.filter(r => filter.value === "all" || (filter.value === "active" ? r.active === true : r.active !== true));
+    if (!shown.length) { residentList.textContent = "No residents in this view."; return; }
+    shown.forEach((resident) => {
       const fullName =
         `${resident.first_name || ""} ${resident.last_name || ""}`.trim();
 
@@ -590,6 +602,7 @@
     >
       Edit
     </button>
+    <button type="button" class="edit-button" onclick="changeResidentStatus(${resident.id})">${resident.active ? "Deactivate" : "Reactivate"}</button>
   </div>
 
 </div>
@@ -598,6 +611,25 @@
       `;
     });
   }
+async function changeResidentStatus(residentId) {
+  const resident = currentResidents.find(r => String(r.id) === String(residentId));
+  if (!resident) { alert("Resident not found. Please refresh and try again."); return; }
+  const name = [resident.first_name, resident.last_name].filter(Boolean).join(" ") || "this resident";
+  const newActive = !resident.active;
+  const prompt = newActive
+    ? `Reactivate ${name}? Scheduled calls may resume. Please check their preferred call time first.`
+    : `Deactivate ${name}? Scheduled calls will stop. Their record and history will be retained; review any outstanding follow-ups separately.`;
+  if (!confirm(prompt)) return;
+  let update = supabaseClient.from("residents").update({ active: newActive }).eq("id", residentId);
+  update = resident.active === null ? update.is("active", null) : update.eq("active", resident.active);
+  const { data, error } = await update.select("id, active");
+  if (error || !data || data.length !== 1 || data[0].active !== newActive) {
+    alert("The status change could not be confirmed. Please refresh and try again.");
+    await loadResidents();
+    return;
+  }
+  await loadResidents();
+}
 async function editResident(residentId) {
   const { data, error } = await supabaseClient
     .from("residents")
