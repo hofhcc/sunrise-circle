@@ -933,6 +933,7 @@ function formatTime(timeValue) {
   const { data, error } = await supabaseClient
     .from("residents")
     .select("id, first_name, last_name, phone_number, preferred_call_time, active")
+    .eq("active", true)
     .order("first_name", { ascending: true });
 
   if (error) {
