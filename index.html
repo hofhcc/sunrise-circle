@@ -547,6 +547,13 @@
       </div>
 
     </section>
+    <section class="section" id="checkInActivitySection">
+      <div class="section-title">
+        <h2>Today's Check-In Activity</h2>
+        <span class="queue-count" id="checkInActivityCount">Loading…</span>
+      </div>
+      <div id="checkInActivityList" aria-live="polite">Loading confirmed responses…</div>
+    </section>
 <section class="section" id="dailyAnnouncementSection">
   <div class="section-title">
     <h2>Daily Phone Announcement</h2>
@@ -849,6 +856,74 @@
 }
 
 
+async function loadCheckInActivity() {
+  const list = document.getElementById("checkInActivityList");
+  const count = document.getElementById("checkInActivityCount");
+  list.textContent = "Loading confirmed responses…";
+  const dateInToronto = (value) => {
+    const parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "America/Toronto", year: "numeric", month: "2-digit", day: "2-digit"
+    }).formatToParts(new Date(value));
+    const field = (name) => parts.find(p => p.type === name).value;
+    return field("year") + "-" + field("month") + "-" + field("day");
+  };
+  const today = dateInToronto(new Date());
+  const [checks, residents] = await Promise.all([
+    supabaseClient.from("check_ins")
+      .select("id,resident_id,response_choice,responded_at,created_at,follow_up_type,follow_up_status")
+      .not("response_choice", "is", null)
+      .order("created_at", { ascending: false }).limit(500),
+    supabaseClient.from("residents").select("id,first_name,last_name")
+  ]);
+  if (checks.error || residents.error) {
+    console.error("Check-in activity unavailable:", checks.error || residents.error);
+    list.textContent = "Check-in activity could not be loaded. Staff access may need updating.";
+    count.textContent = "Unavailable";
+    return;
+  }
+  const names = new Map((residents.data || []).map(r =>
+    [String(r.id), [r.first_name, r.last_name].filter(Boolean).join(" ")]));
+  const meanings = {
+    "0": "Urgent non-emergency assistance", "1": "I'm okay",
+    "2": "Friendly callback", "3": "Transportation assistance",
+    "4": "Transportation (older menu)"
+  };
+  const rows = (checks.data || []).filter(r =>
+    r.responded_at && dateInToronto(r.responded_at) === today
+  ).sort((a, b) => new Date(b.responded_at) - new Date(a.responded_at));
+  count.textContent = rows.length + (rows.length === 1 ? " response" : " responses");
+  list.replaceChildren();
+  if (!rows.length) {
+    list.textContent = "No confirmed keypad responses recorded today.";
+    return;
+  }
+  rows.forEach(r => {
+    const row = document.createElement("div");
+    row.className = "follow-up";
+    const name = document.createElement("div");
+    name.className = "resident-name";
+    name.textContent = names.get(String(r.resident_id)) || "Resident ID: " + r.resident_id;
+    const detail = document.createElement("div");
+    const selection = document.createElement("div");
+    selection.className = "request-title";
+    selection.textContent = "Pressed " + r.response_choice + " — " +
+      (meanings[String(r.response_choice)] || "Other selection");
+    const time = document.createElement("div");
+    time.className = "request-time";
+    time.textContent = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "America/Toronto", hour: "numeric", minute: "2-digit", hour12: true
+    }).format(new Date(r.responded_at));
+    const followUp = document.createElement("div");
+    followUp.className = "resident-subtitle";
+    followUp.textContent = r.follow_up_type
+      ? "Follow-up: " + (r.follow_up_status || "pending").replaceAll("_", " ")
+      : "No follow-up requested";
+    detail.append(selection, time, followUp);
+    row.append(name, detail);
+    list.appendChild(row);
+  });
+}
+
 async function loadPendingFollowUps() {
   const { data, error } = await supabaseClient
     .from("pending_follow_ups")
@@ -1000,6 +1075,7 @@ async function markFollowUpComplete(checkInId) {
   document.querySelector(".dashboard").style.display = "block";
   loadDailyAnnouncement();
   loadDashboardSummary();
+  loadCheckInActivity();
   loadPendingFollowUps();
   loadResidents();
 }
