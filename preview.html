@@ -891,18 +891,23 @@ async function loadCheckInActivity() {
   const rows = (checks.data || []).filter(r =>
     r.responded_at && dateInToronto(r.responded_at) === today
   ).sort((a, b) => new Date(b.responded_at) - new Date(a.responded_at));
-  count.textContent = rows.length + (rows.length === 1 ? " response" : " responses");
+  const grouped = new Map();
+  rows.forEach(r => {
+    const key = String(r.resident_id);
+    if (!grouped.has(key)) grouped.set(key, []);
+    grouped.get(key).push(r);
+  });
+  count.textContent = grouped.size + (grouped.size === 1 ? " senior" : " seniors") +
+    " · " + rows.length + (rows.length === 1 ? " response" : " responses");
   list.replaceChildren();
   if (!rows.length) {
     list.textContent = "No confirmed keypad responses recorded today.";
     return;
   }
-  rows.forEach(r => {
-    const row = document.createElement("div");
-    row.className = "follow-up";
-    const name = document.createElement("div");
-    name.className = "resident-name";
-    name.textContent = names.get(String(r.resident_id)) || "Resident ID: " + r.resident_id;
+  const formatTime = (value) => new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Toronto", hour: "numeric", minute: "2-digit", hour12: true
+  }).format(new Date(value));
+  const makeResponse = (r) => {
     const detail = document.createElement("div");
     const selection = document.createElement("div");
     selection.className = "request-title";
@@ -910,16 +915,44 @@ async function loadCheckInActivity() {
       (meanings[String(r.response_choice)] || "Other selection");
     const time = document.createElement("div");
     time.className = "request-time";
-    time.textContent = new Intl.DateTimeFormat("en-CA", {
-      timeZone: "America/Toronto", hour: "numeric", minute: "2-digit", hour12: true
-    }).format(new Date(r.responded_at));
+    time.textContent = formatTime(r.responded_at);
     const followUp = document.createElement("div");
     followUp.className = "resident-subtitle";
     followUp.textContent = r.follow_up_type
       ? "Follow-up: " + (r.follow_up_status || "pending").replaceAll("_", " ")
       : "No follow-up requested";
     detail.append(selection, time, followUp);
-    row.append(name, detail);
+    return detail;
+  };
+  grouped.forEach((history, residentId) => {
+    const row = document.createElement("div");
+    row.className = "follow-up";
+    const name = document.createElement("div");
+    name.className = "resident-name";
+    name.textContent = names.get(residentId) || "Resident ID: " + residentId;
+    const content = document.createElement("div");
+    content.appendChild(makeResponse(history[0]));
+    if (history.length > 1) {
+      const older = document.createElement("details");
+      older.style.marginTop = "10px";
+      const summary = document.createElement("summary");
+      summary.style.cursor = "pointer";
+      summary.style.fontSize = "13px";
+      summary.style.fontWeight = "600";
+      summary.style.color = "#475569";
+      const earlier = history.length - 1;
+      summary.textContent = earlier + (earlier === 1 ? " earlier response" : " earlier responses") + " · View history";
+      older.appendChild(summary);
+      history.slice(1).forEach(r => {
+        const entry = makeResponse(r);
+        entry.style.padding = "10px 0 10px 12px";
+        entry.style.borderLeft = "2px solid #e2e8f0";
+        entry.style.marginTop = "8px";
+        older.appendChild(entry);
+      });
+      content.appendChild(older);
+    }
+    row.append(name, content);
     list.appendChild(row);
   });
 }
